@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rental Deposit Deduction Estimator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Deposit Deduction Estimator</h1>
+        
+        <div class="space-y-4">
+            <!-- Inputs -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Total Security Deposit (₹)</label>
+                <input type="number" id="deposit" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 50000">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Monthly Rent (₹)</label>
+                <input type="number" id="rent" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 20000">
+            </div>
+
+            <!-- Toggles/Checkboxes -->
+            <div class="space-y-2 mt-4">
+                <label class="flex items-center space-x-3 text-sm text-gray-700">
+                    <input type="checkbox" id="painting" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                    <span>Standard Painting Charge Deducted? (Usually 1 month rent)</span>
+                </label>
+
+                <label class="flex items-center space-x-3 text-sm text-gray-700">
+                    <input type="checkbox" id="cleaning" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                    <span>Deep Cleaning Required? (Est. ₹2,000)</span>
+                </label>
+
+                <label class="flex items-center space-x-3 text-sm text-gray-700">
+                    <input type="checkbox" id="notice" class="form-checkbox h-4 w-4 text-blue-600 rounded">
+                    <span>Shortfall in Notice Period? (1 month rent penalty)</span>
+                </label>
+            </div>
+
+            <!-- Damages -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mt-2">Estimated Damages (₹)</label>
+                <input type="number" id="damages" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 1500" value="0">
+            </div>
+
+            <button onclick="calculateRefund()" class="w-full bg-blue-600 text-white font-semibold py-3 rounded-md hover:bg-blue-700 transition duration-200 mt-4">
+                Calculate Estimated Refund
+            </button>
+        </div>
+
+        <!-- Output -->
+        <div id="result-box" class="mt-6 hidden bg-gray-50 border border-gray-200 p-4 rounded-md">
+            <h2 class="text-lg font-semibold text-gray-800 text-center">Estimated Refund</h2>
+            <p id="refund-amount" class="text-3xl font-bold text-blue-600 text-center mt-2">₹0</p>
+            <ul id="deduction-breakdown" class="text-sm text-gray-600 mt-4 space-y-1">
+                <!-- Breakdown injected by JS -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        function calculateRefund() {
+            const deposit = parseFloat(document.getElementById('deposit').value) || 0;
+            const rent = parseFloat(document.getElementById('rent').value) || 0;
+            const damages = parseFloat(document.getElementById('damages').value) || 0;
+            
+            let totalDeductions = 0;
+            let breakdownHtml = '<li class="font-semibold border-b pb-1 mb-1">Deduction Breakdown:</li>';
+
+            if (document.getElementById('painting').checked) {
+                totalDeductions += rent;
+                breakdownHtml += `<li>- Painting Charge: ₹${rent}</li>`;
+            }
+            if (document.getElementById('cleaning').checked) {
+                totalDeductions += 2000;
+                breakdownHtml += `<li>- Deep Cleaning: ₹2,000</li>`;
+            }
+            if (document.getElementById('notice').checked) {
+                totalDeductions += rent;
+                breakdownHtml += `<li>- Notice Period Penalty: ₹${rent}</li>`;
+            }
+            if (damages > 0) {
+                totalDeductions += damages;
+                breakdownHtml += `<li>- Damages: ₹${damages}</li>`;
+            }
+
+            const refund = deposit - totalDeductions;
+            
+            const resultBox = document.getElementById('result-box');
+            const refundAmount = document.getElementById('refund-amount');
+            const deductionBreakdown = document.getElementById('deduction-breakdown');
+
+            resultBox.classList.remove('hidden');
+            
+            if (refund < 0) {
+                refundAmount.innerText = `You owe ₹${Math.abs(refund)}`;
+                refundAmount.classList.replace('text-blue-600', 'text-red-600');
+            } else {
+                refundAmount.innerText = `₹${refund}`;
+                refundAmount.classList.replace('text-red-600', 'text-blue-600');
+            }
+
+            if (totalDeductions === 0) {
+                deductionBreakdown.innerHTML = '<li>No deductions applied.</li>';
+            } else {
+                deductionBreakdown.innerHTML = breakdownHtml;
+            }
+        }
+    </script>
+</body>
+</html>
